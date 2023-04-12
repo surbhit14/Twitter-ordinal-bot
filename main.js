@@ -1,52 +1,57 @@
 // Require the necessary packages
 const Twit = require('twit');
 const axios = require('axios');
+require('dotenv').config();
 
 // Configure the Twitter API client with your credentials
 const T = new Twit({
-  consumer_key: '<your_consumer_key>',
-  consumer_secret: '<your_consumer_secret>',
-  access_token: '<your_access_token>',
-  access_token_secret: '<your_access_token_secret>'
+  consumer_key: 'fSBsDhOrkaB5QfIUTARw654Mv',
+  consumer_secret: 'VaLtomMkrIYCMgfN7QSkyCevLt4UUFY0TVbifakgewLX5sXgIT',
+  access_token: '1388373588919545857-Xsd6IwWtEqfMD224MaObd0xc5gCoxP',
+  access_token_secret: 'mmqT0GdxI7pgWndJCwo35wydN06mNTceD69QfePehJhBb'
 });
 
 // Define the URL for the Inscribe News API
-const inscribeNewsApiUrl = 'https://inscribe.news/api/info/';
+const inscribeNewsApiUrl = 'https://inscribe.news/api/data/ord-news';
+
+function tweetNews(tweet) {
+  T.post('statuses/update', { status: tweet }, function (err, data, response) {
+    if (err) {
+      console.log('Error in tweeting:', err);
+    } else {
+      console.log('Tweeted:', data.text);
+    }
+  });
+}
 
 // Set the initial timestamp to start checking for new news from
-let lastTimestamp = Date.now();
+let latestTimestamp = 0;
 
-// Define the function to retrieve the news headlines from the Inscribe News API and tweet them
 async function getAndTweetNews() {
   try {
-    // Retrieve the news headlines from the Inscribe News API
-    const response = await axios.get(inscribeNewsApiUrl);
+    const response = await axios.get('https://inscribe.news/api/data/ord-news');
+    const news = response.data.keys;
+    // console.log(news);
+    for (let i = 0; i < news.length; i++) {
+      const timestamp = Date.parse(news[i].timestamp);
+      // const timestamp = parseInt(new Date(news[i].timestamp).getTime() / 1000);
 
-    // Filter the headlines to only include those in the Ordinal News Standard format and with a timestamp greater than the last one
-    const filteredHeadlines = response.data.filter((headline) => {
-      return /^\d+\.\s/.test(headline.text) && headline.timestamp > lastTimestamp;
-    });
-
-    // If there are any filtered headlines, tweet them and update the last timestamp
-    if (filteredHeadlines.length > 0) {
-      filteredHeadlines.forEach((headline) => {
-        const tweetText = `${headline.text} #OrdinalNewsStandard`;
-        T.post('statuses/update', { status: tweetText }, function(err, data, response) {
-          if (err) {
-            console.log('Error while tweeting:', err);
-            return;
-          }
-          console.log('Tweet posted successfully:', tweetText);
-        });
-      });
-      lastTimestamp = filteredHeadlines[0].timestamp;
+      if (timestamp > latestTimestamp) {
+        const insId = news[i].metadata.id;
+        const insContentResponse = await axios.get(`https://inscribe.news/api/content/${insId}`);
+        console.log(insContentResponse.data);
+        const insContent = insContentResponse.data.content;
+        // console.log(insContent);
+        const tweet = `${insContent.title} ${insContent.link}`;
+        tweetNews(tweet);
+        latestTimestamp = timestamp;
+      }
     }
-
   } catch (error) {
-    console.log('Error while retrieving news from Inscribe News API:', error);
+    console.log(error);
   }
 }
 
 // Call the getAndTweetNews function initially, and then every 60 seconds
 getAndTweetNews();
-setInterval(getAndTweetNews, 60000);
+setInterval(getAndTweetNews, 6000 * 1000);
