@@ -33,15 +33,17 @@ async function getAndTweetNews() {
     const news = response.data.keys;
     // console.log(news);
     for (let i = 0; i < news.length; i++) {
-      const timestamp = Date.parse(news[i].timestamp);
+      // console.log(news[i].metadata.timestamp);
+      const timestamp = Date.parse(news[i].metadata.timestamp);
       // const timestamp = parseInt(new Date(news[i].timestamp).getTime() / 1000);
 
       if (timestamp > latestTimestamp) {
         const insId = news[i].metadata.id;
         const insContentResponse = await axios.get(`https://inscribe.news/api/content/${insId}`);
-        console.log(insContentResponse.data);
-        const insContent = insContentResponse.data.content;
+        const insContent = insContentResponse.data;
         // console.log(insContent);
+        console.log(insContent.title);
+        console.log(insContent.link);
         const tweet = `${insContent.title} ${insContent.link}`;
         tweetNews(tweet);
         latestTimestamp = timestamp;
