@@ -43,8 +43,8 @@ async function getAndTweetNews() {
         const insContent = insContentResponse.data;
         // console.log(insContent);
         console.log(insContent.title);
-        console.log(insContent.link);
-        const tweet = `${insContent.title} ${insContent.link}`;
+        console.log(insContent.url);
+        const tweet = `${insContent.title} ${insContent.url}`;
         tweetNews(tweet);
         latestTimestamp = timestamp;
       }
