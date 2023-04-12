@@ -5,10 +5,10 @@ require('dotenv').config();
 
 // Configure the Twitter API client with your credentials
 const T = new Twit({
-  consumer_key: 'fSBsDhOrkaB5QfIUTARw654Mv',
-  consumer_secret: 'VaLtomMkrIYCMgfN7QSkyCevLt4UUFY0TVbifakgewLX5sXgIT',
-  access_token: '1388373588919545857-Xsd6IwWtEqfMD224MaObd0xc5gCoxP',
-  access_token_secret: 'mmqT0GdxI7pgWndJCwo35wydN06mNTceD69QfePehJhBb'
+  consumer_key: process.env.TWITTER_CONSUMER_KEY,
+  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+  access_token: process.env.TWITTER_ACCESS_TOKEN,
+  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
 });
 
 // Define the URL for the Inscribe News API
